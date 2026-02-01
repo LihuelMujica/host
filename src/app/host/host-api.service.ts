@@ -14,4 +14,15 @@ export class HostApiService {
   createRoom(): Observable<CreateRoomResponse> {
     return this.http.post<CreateRoomResponse>(`${this.baseUrl}/room/create`, {});
   }
+
+  startGame(roomCode: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/game/${roomCode}/start`, {
+      conjunto: 'string',
+      maxRounds: 10,
+    });
+  }
+
+  nextRound(gameId: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/game/${gameId}/next-round`, {});
+  }
 }

@@ -81,6 +81,7 @@ import { HostPlayerSnapshot } from '../models';
           <button
             type="button"
             class="text-lg font-semibold uppercase tracking-[0.2em] text-slate-900 underline underline-offset-8 transition hover:opacity-70 sm:text-xl"
+            (click)="start.emit()"
           >
             EMPEZAR
           </button>
@@ -93,4 +94,5 @@ export class LobbyComponent {
   @Input({ required: true }) roomCode = '';
   @Input({ required: true }) players: HostPlayerSnapshot[] = [];
   @Output() readonly cancel = new EventEmitter<void>();
+  @Output() readonly start = new EventEmitter<void>();
 }
