@@ -16,13 +16,14 @@ import { GameShellComponent } from './host/game-shell.component';
       <span class="text-lg" aria-hidden="true">{{ isMuted ? '🔇' : '🔊' }}</span>
       <span>{{ isMuted ? 'Música apagada' : 'Música encendida' }}</span>
     </button>
-    <audio #bgMusic src="assets/music.ogg" loop preload="auto"></audio>
+    <audio #bgMusic src="assets/music.ogg" loop preload="auto" autoplay></audio>
     <app-game-shell />
   `,
 })
 export class AppComponent implements AfterViewInit {
   @ViewChild('bgMusic') bgMusic?: ElementRef<HTMLAudioElement>;
   isMuted = false;
+  private resumeOnInteraction = false;
 
   ngAfterViewInit(): void {
     this.syncAudioState();
@@ -44,7 +45,16 @@ export class AppComponent implements AfterViewInit {
       return;
     }
     void audio.play().catch(() => {
-      // Autoplay might be blocked until user interaction.
+      if (this.resumeOnInteraction) {
+        return;
+      }
+      this.resumeOnInteraction = true;
+      const resume = () => {
+        this.resumeOnInteraction = false;
+        void audio.play();
+      };
+      window.addEventListener('pointerdown', resume, { once: true });
+      window.addEventListener('keydown', resume, { once: true });
     });
   }
 }
