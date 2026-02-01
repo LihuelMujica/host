@@ -338,6 +338,8 @@ export class GameShellComponent {
     if (!snapshot) {
       return;
     }
+    this.answeredPlayerIdsSubject.next(new Set());
+    this.debateRequestInFlight = false;
     this.api.nextRound(snapshot.roomCode).subscribe({
       next: () => {
         this.phaseOverrideSubject.next('QUESTIONS');
