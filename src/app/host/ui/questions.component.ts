@@ -41,19 +41,14 @@ import { HostPlayerSnapshot } from '../models';
               >
                 <div class="flex flex-col items-center text-center" *ngFor="let player of players">
                   <div
-                    class="flex h-20 w-20 items-center justify-center rounded-full bg-purple-200/80 md:h-24 md:w-24"
-                    aria-hidden="true"
+                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-purple-200/80 md:h-24 md:w-24"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="h-12 w-12 text-purple-900/70 md:h-14 md:w-14"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    >
-                      <path d="M20 21a8 8 0 1 0-16 0" />
-                      <circle cx="12" cy="8" r="3.5" />
-                    </svg>
+                    <img
+                      class="h-full w-full object-contain"
+                      [src]="'assets/img/avatar_' + player.avatarId + '.png'"
+                      [alt]="player.name"
+                      loading="lazy"
+                    />
                   </div>
                   <div class="mt-3 break-words text-lg tracking-wide sm:text-xl">{{ player.name }}</div>
                   <div class="mt-1 text-base text-black/80 sm:text-lg">

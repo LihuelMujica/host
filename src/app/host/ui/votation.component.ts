@@ -36,19 +36,14 @@ import { HostPlayerSnapshot } from '../models';
                   *ngFor="let player of firstRowPlayers"
                 >
                   <div
-                    class="flex aspect-square h-14 items-center justify-center rounded-full bg-purple-200/80"
-                    aria-hidden="true"
+                    class="flex aspect-square h-14 items-center justify-center overflow-hidden rounded-full bg-purple-200/80"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="block h-8 w-8 text-purple-900/70"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    >
-                      <path d="M20 21a8 8 0 1 0-16 0" />
-                      <circle cx="12" cy="8" r="3.5" />
-                    </svg>
+                    <img
+                      class="h-full w-full object-contain"
+                      [src]="'assets/img/avatar_' + player.avatarId + '.png'"
+                      [alt]="player.name"
+                      loading="lazy"
+                    />
                   </div>
 
                   <div class="mt-2 text-base tracking-wide">{{ player.name }}</div>
@@ -95,19 +90,14 @@ import { HostPlayerSnapshot } from '../models';
                   *ngFor="let player of remainingPlayers"
                 >
                   <div
-                    class="flex aspect-square h-14 items-center justify-center rounded-full bg-purple-200/80"
-                    aria-hidden="true"
+                    class="flex aspect-square h-14 items-center justify-center overflow-hidden rounded-full bg-purple-200/80"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="block h-8 w-8 text-purple-900/70"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    >
-                      <path d="M20 21a8 8 0 1 0-16 0" />
-                      <circle cx="12" cy="8" r="3.5" />
-                    </svg>
+                    <img
+                      class="h-full w-full object-contain"
+                      [src]="'assets/img/avatar_' + player.avatarId + '.png'"
+                      [alt]="player.name"
+                      loading="lazy"
+                    />
                   </div>
 
                   <div class="mt-2 text-base tracking-wide">{{ player.name }}</div>
