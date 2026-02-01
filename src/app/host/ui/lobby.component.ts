@@ -1,11 +1,11 @@
-import { NgFor } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { HostPlayerSnapshot } from '../models';
 
 @Component({
   selector: 'app-lobby',
   standalone: true,
-  imports: [NgFor],
+  imports: [NgFor, NgIf],
   template: `
     <main class="min-h-dvh bg-gradient-to-b from-violet-50 via-white to-slate-50 px-6 py-10">
       <section
@@ -36,8 +36,10 @@ import { HostPlayerSnapshot } from '../models';
         <div class="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div class="flex flex-col items-center" *ngFor="let player of players">
             <div
-              class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-purple-200/70 to-pink-200/50 shadow-[0_20px_45px_-35px_rgba(88,28,135,0.6)]"
+              class="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-purple-200/70 to-pink-200/50 shadow-[0_20px_45px_-35px_rgba(88,28,135,0.6)] transition"
               aria-hidden="true"
+              [class.opacity-50]="player.connectionState === 'DISCONNECTED'"
+              [class.grayscale]="player.connectionState === 'DISCONNECTED'"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -45,13 +47,24 @@ import { HostPlayerSnapshot } from '../models';
                 fill="none"
                 stroke="currentColor"
                 stroke-width="1.8"
+                [class.text-slate-500]="player.connectionState === 'DISCONNECTED'"
               >
                 <path d="M20 21a8 8 0 1 0-16 0" />
                 <circle cx="12" cy="8" r="3.5" />
               </svg>
             </div>
-            <div class="mt-3 text-lg tracking-wide text-slate-800 sm:text-xl">
+            <div
+              class="mt-3 text-lg tracking-wide text-slate-800 sm:text-xl"
+              [class.text-slate-400]="player.connectionState === 'DISCONNECTED'"
+              [class.line-through]="player.connectionState === 'DISCONNECTED'"
+            >
               {{ player.name }}
+            </div>
+            <div
+              *ngIf="player.connectionState === 'DISCONNECTED'"
+              class="mt-1 text-xs uppercase tracking-[0.25em] text-rose-500"
+            >
+              Desconectado
             </div>
           </div>
         </div>
@@ -60,6 +73,7 @@ import { HostPlayerSnapshot } from '../models';
           <button
             type="button"
             class="text-lg font-semibold tracking-[0.2em] text-slate-700 underline underline-offset-8 transition hover:opacity-70 sm:text-xl"
+            (click)="cancel.emit()"
           >
             Cancelar
           </button>
@@ -67,6 +81,7 @@ import { HostPlayerSnapshot } from '../models';
           <button
             type="button"
             class="text-lg font-semibold uppercase tracking-[0.2em] text-slate-900 underline underline-offset-8 transition hover:opacity-70 sm:text-xl"
+            (click)="start.emit()"
           >
             EMPEZAR
           </button>
@@ -78,4 +93,6 @@ import { HostPlayerSnapshot } from '../models';
 export class LobbyComponent {
   @Input({ required: true }) roomCode = '';
   @Input({ required: true }) players: HostPlayerSnapshot[] = [];
+  @Output() readonly cancel = new EventEmitter<void>();
+  @Output() readonly start = new EventEmitter<void>();
 }

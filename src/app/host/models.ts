@@ -10,6 +10,25 @@ export type GameState =
 
 export type ConnectionState = 'CONNECTED' | 'DISCONNECTED';
 
+export interface HostQuestion {
+  id: number;
+  pregunta: string;
+  extra_data: Record<string, unknown>;
+}
+
+export interface HostRoundAnswer {
+  playerId: string;
+  playerName: string;
+  answerText: string;
+}
+
+export interface HostRoundVote {
+  playerId: string;
+  playerName: string;
+  votedPlayerId: string;
+  votedPlayerName: string;
+}
+
 export interface HostPlayerSnapshot {
   playerId: string;
   name: string;
@@ -17,6 +36,8 @@ export interface HostPlayerSnapshot {
   isImpostor: boolean;
   state: string;
   connectionState: ConnectionState;
+  currentQuestion?: HostQuestion | null;
+  currentAnswer?: HostRoundAnswer | null;
 }
 
 export interface HostSnapshot {
@@ -28,6 +49,10 @@ export interface HostSnapshot {
   roundNumber: number;
   cycleNumber: number;
   players: HostPlayerSnapshot[];
+  playerQuestion?: HostQuestion | null;
+  impostorQuestion?: HostQuestion | null;
+  currentRoundAnswers?: HostRoundAnswer[];
+  currentRoundVotes?: HostRoundVote[];
 }
 
 export interface HostEvent<TPayload = unknown> {
