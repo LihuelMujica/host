@@ -7,34 +7,29 @@ import { HostPlayerSnapshot } from '../models';
   standalone: true,
   imports: [NgFor],
   template: `
-    <main class="min-h-dvh bg-white text-black px-6 py-8 sm:px-10 sm:py-10">
-      <section class="mx-auto w-full max-w-5xl">
-        <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-          <p class="max-w-md text-xl leading-snug sm:text-2xl">
+    <main class="page-shell px-6 py-10">
+      <section class="mx-auto w-full max-w-5xl card p-8 sm:p-12">
+        <div class="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+          <p class="max-w-md text-xl leading-snug sm:text-2xl text-slate-700">
             Entren por sus celulares a<br />
-            <span class="tracking-wide">GAMETITLE.IO</span> e<br />
+            <span class="tracking-wide text-slate-900">GAMETITLE.IO</span> e<br />
             introduzcan el código
           </p>
 
           <div class="sm:text-right">
-            <div class="font-sans font-normal tracking-widest text-6xl sm:text-7xl md:text-8xl">
+            <div class="room-code text-slate-900">
               {{ roomCode }}
             </div>
           </div>
         </div>
 
-        <h2 class="mt-10 text-center font-sans font-normal tracking-[0.18em] text-2xl sm:text-3xl">
+        <h2 class="mt-12 text-center tracking-[0.18em] text-2xl sm:text-3xl text-slate-600">
           JUGADORES
         </h2>
 
-        <div
-          class="mt-8 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-4 sm:gap-x-12 md:gap-x-16"
-        >
+        <div class="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-4">
           <div class="flex flex-col items-center" *ngFor="let player of players">
-            <div
-              class="h-20 w-20 rounded-full bg-purple-200/80 flex items-center justify-center"
-              aria-hidden="true"
-            >
+            <div class="player-chip" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 class="h-12 w-12 text-purple-900/70"
@@ -46,22 +41,18 @@ import { HostPlayerSnapshot } from '../models';
                 <circle cx="12" cy="8" r="3.5" />
               </svg>
             </div>
-            <div class="mt-3 text-lg tracking-wide sm:text-xl">{{ player.name }}</div>
+            <div class="mt-3 text-lg tracking-wide sm:text-xl text-slate-800">
+              {{ player.name }}
+            </div>
           </div>
         </div>
 
-        <div class="mt-12 flex items-center justify-center gap-16 sm:gap-28">
-          <button
-            type="button"
-            class="text-2xl font-semibold underline underline-offset-8 decoration-2 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-          >
+        <div class="mt-12 action-row">
+          <button type="button" class="ghost-button">
             Cancelar
           </button>
 
-          <button
-            type="button"
-            class="text-2xl font-semibold uppercase tracking-wide underline underline-offset-8 decoration-2 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-          >
+          <button type="button" class="ghost-button uppercase">
             EMPEZAR
           </button>
         </div>

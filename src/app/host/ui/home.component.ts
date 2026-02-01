@@ -4,22 +4,26 @@ import { Component, EventEmitter, Output } from '@angular/core';
   selector: 'app-home',
   standalone: true,
   template: `
-    <main class="min-h-dvh flex flex-col items-center justify-center px-6 bg-white text-black">
-      <h1
-        class="text-center font-sans font-normal tracking-[0.18em] uppercase text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
+    <main class="page-shell">
+      <section
+        class="min-h-dvh flex flex-col items-center justify-center px-6 gap-16"
       >
-        GAME TITLE
-      </h1>
-
-      <div class="mt-16 sm:mt-20 md:mt-24 flex flex-col items-center gap-4 sm:gap-5">
-        <button
-          type="button"
-          class="text-base sm:text-lg md:text-xl font-semibold tracking-wide underline underline-offset-4 decoration-2 hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-          (click)="startGame.emit()"
-        >
-          JUGAR
-        </button>
-      </div>
+        <div class="card max-w-3xl w-full p-10 sm:p-14 text-center">
+          <p class="uppercase tracking-[0.3em] text-sm text-slate-400">
+            Host experience
+          </p>
+          <h1 class="hero-title mt-6">GAME TITLE</h1>
+          <p class="mt-6 text-lg text-slate-600">
+            Prepara la sala, comparte el código y comienza una ronda con
+            amigos.
+          </p>
+          <div class="mt-10">
+            <button type="button" class="primary-link" (click)="startGame.emit()">
+              JUGAR
+            </button>
+          </div>
+        </div>
+      </section>
     </main>
   `,
 })
