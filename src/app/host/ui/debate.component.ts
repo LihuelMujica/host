@@ -1,70 +1,88 @@
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { interval, Subject, takeUntil } from 'rxjs';
 
 interface DebateAnswer {
   playerName: string;
   answerText: string;
+  avatarId?: number | null;
 }
 
 @Component({
   selector: 'app-debate',
   standalone: true,
-  imports: [NgFor],
+  imports: [NgFor, NgIf],
   template: `
-    <main class="min-h-dvh overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
-      <div class="fixed right-4 top-4 z-10 sm:right-8 sm:top-6">
-        <div class="font-mono text-xs tracking-widest text-emerald-100/80 sm:text-sm md:text-base">
-          TIMER: {{ formattedTime }}
+    <main class="min-h-dvh bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
+      <div class="fixed right-6 top-6 z-10 sm:right-10 sm:top-8">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-emerald-200/70 tracking-wide sm:text-sm">TIEMPO</span>
+          <div
+            class="rounded-full border border-emerald-200/30 bg-slate-950/60 px-3 py-1 font-mono text-base tracking-widest text-emerald-100 sm:text-lg md:text-xl"
+            aria-label="Timer"
+          >
+            {{ formattedTime }}
+          </div>
         </div>
       </div>
 
-      <main class="min-h-dvh px-4 py-4 sm:px-8 sm:py-6">
-        <section class="flex min-h-dvh flex-col items-center justify-start">
-          <header class="w-full max-w-6xl pt-10 sm:pt-12">
-            <div class="text-xs tracking-wide text-emerald-100/70 sm:text-sm">La pregunta era...</div>
-            <h1 class="mt-2 max-w-5xl text-base font-normal leading-snug text-fuchsia-100 sm:text-lg md:text-xl">
+      <main class="min-h-dvh px-6 py-6 sm:px-10 sm:py-8">
+        <section class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col">
+          <div class="h-14 sm:h-16"></div>
+
+          <div class="text-center">
+            <div class="text-sm tracking-wide text-emerald-100/70 sm:text-base">La pregunta era...</div>
+            <h1 class="mt-3 text-lg font-normal leading-snug text-fuchsia-100 sm:text-xl md:text-2xl">
               {{ question }}
             </h1>
-            <div class="mt-3 max-w-4xl text-sm text-slate-200/80 leading-snug sm:text-base md:text-lg">
+            <p class="mt-4 text-base text-slate-200/80 leading-snug sm:text-lg md:text-xl">
               Estas son sus respuestas — debatan quién es el impostor.
-            </div>
-          </header>
+            </p>
+          </div>
 
-          <div class="mt-4 flex w-full flex-1 items-start justify-center sm:mt-6">
-            <div
-              class="[--board-w:1100px] [--board-h:560px] [--pad:2rem] [--s:min(1,calc((100vw-var(--pad))/var(--board-w)),calc((100vh-12rem)/var(--board-h)))] [transform:scale(var(--s))] [transform-origin:top_center] w-[var(--board-w)]"
-            >
-              <div class="grid grid-cols-5 gap-x-10 gap-y-10 [grid-auto-rows:1fr]">
-                <article
-                  class="flex h-[120px] flex-col items-center justify-center px-2 text-center"
-                  *ngFor="let answer of answers"
-                >
+          <div class="mt-10 flex-1 min-h-0 sm:mt-12">
+            <div class="h-full overflow-auto pr-1">
+              <div
+                class="grid justify-items-center gap-x-10 gap-y-10 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] sm:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]"
+              >
+                <div class="flex flex-col items-center text-center" *ngFor="let answer of answers">
                   <div
-                    class="flex aspect-square h-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30"
+                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30 md:h-24 md:w-24"
                     aria-hidden="true"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="block h-8 w-8 text-emerald-100/80"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    >
-                      <path d="M20 21a8 8 0 1 0-16 0" />
-                      <circle cx="12" cy="8" r="3.5" />
-                    </svg>
+                    <ng-container *ngIf="answer.avatarId !== null && answer.avatarId !== undefined; else fallbackAvatar">
+                      <img
+                        class="h-full w-full object-contain"
+                        [src]="'assets/img/avatar_' + answer.avatarId + '.png'"
+                        [alt]="answer.playerName"
+                        loading="lazy"
+                      />
+                    </ng-container>
+                    <ng-template #fallbackAvatar>
+                      <svg
+                        viewBox="0 0 24 24"
+                        class="block h-9 w-9 text-emerald-100/80"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                      >
+                        <path d="M20 21a8 8 0 1 0-16 0" />
+                        <circle cx="12" cy="8" r="3.5" />
+                      </svg>
+                    </ng-template>
                   </div>
-
-                  <div class="mt-2 text-base tracking-wide text-slate-100">{{ answer.playerName }}</div>
-
-                  <div class="mt-1 text-sm text-slate-200/85 leading-snug break-words whitespace-normal">
+                  <div class="mt-3 break-words text-lg tracking-wide text-slate-100 sm:text-xl">
+                    {{ answer.playerName }}
+                  </div>
+                  <div class="mt-2 text-base text-slate-200/85 leading-snug sm:text-lg">
                     {{ answer.answerText }}
                   </div>
-                </article>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="h-8 sm:h-10"></div>
         </section>
       </main>
     </main>
@@ -80,7 +98,7 @@ export class DebateComponent implements OnInit, OnDestroy {
   remainingSeconds = 0;
 
   get formattedTime(): string {
-    return String(this.remainingSeconds).padStart(3, '0');
+    return `00:${String(this.remainingSeconds).padStart(2, '0')}`;
   }
 
   ngOnInit(): void {

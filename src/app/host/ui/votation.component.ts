@@ -8,35 +8,39 @@ import { HostPlayerSnapshot } from '../models';
   standalone: true,
   imports: [NgFor],
   template: `
-    <main class="min-h-dvh overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
-      <div class="fixed right-4 top-4 z-10 sm:right-8 sm:top-6">
-        <div class="font-mono text-xs tracking-widest text-emerald-100/80 sm:text-sm md:text-base">
-          TIMER: {{ formattedTime }}
+    <main class="min-h-dvh bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
+      <div class="fixed right-6 top-6 z-10 sm:right-10 sm:top-8">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-emerald-200/70 tracking-wide sm:text-sm">TIEMPO</span>
+          <div
+            class="rounded-full border border-emerald-200/30 bg-slate-950/60 px-3 py-1 font-mono text-base tracking-widest text-emerald-100 sm:text-lg md:text-xl"
+            aria-label="Timer"
+          >
+            {{ formattedTime }}
+          </div>
         </div>
       </div>
 
-      <main class="min-h-dvh px-4 py-4 sm:px-8 sm:py-6">
-        <section class="flex min-h-dvh flex-col items-center justify-start">
-          <header class="w-full max-w-6xl pt-10 sm:pt-12">
-            <h1 class="max-w-5xl text-base font-normal leading-snug text-slate-100/85 sm:text-lg md:text-xl">
+      <main class="min-h-dvh px-6 py-6 sm:px-10 sm:py-8">
+        <section class="mx-auto flex min-h-dvh w-full max-w-6xl flex-col">
+          <div class="h-14 sm:h-16"></div>
+
+          <div class="text-center">
+            <h1 class="text-lg font-normal leading-snug text-slate-100/85 sm:text-xl md:text-2xl">
               Hora de votar! Si empatan o sale mayoría “saltear”, se pasará a la siguiente pregunta (si es la última
               ronda ante un empate ganaría el impostor)
             </h1>
-
             <div class="mt-4 h-px w-24 bg-emerald-200/20"></div>
-          </header>
+          </div>
 
-          <div class="mt-4 flex w-full flex-1 items-start justify-center sm:mt-6">
-            <div
-              class="[--board-w:1100px] [--board-h:560px] [--pad:2rem] [--s:min(1,calc((100vw-var(--pad))/var(--board-w)),calc((100vh-12rem)/var(--board-h)))] [transform:scale(var(--s))] [transform-origin:top_center] w-[var(--board-w)]"
-            >
-              <div class="grid grid-cols-5 gap-x-10 gap-y-10 [grid-auto-rows:1fr]">
-                <article
-                  class="flex h-[120px] flex-col items-center justify-center px-2 text-center"
-                  *ngFor="let player of firstRowPlayers"
-                >
+          <div class="mt-10 flex-1 min-h-0 sm:mt-12">
+            <div class="h-full overflow-auto pr-1">
+              <div
+                class="grid justify-items-center gap-x-10 gap-y-10 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] sm:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]"
+              >
+                <div class="flex flex-col items-center text-center" *ngFor="let player of players">
                   <div
-                    class="flex aspect-square h-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30"
+                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30 md:h-24 md:w-24"
                   >
                     <img
                       class="h-full w-full object-contain"
@@ -45,47 +49,22 @@ import { HostPlayerSnapshot } from '../models';
                       loading="lazy"
                     />
                   </div>
-
-                  <div class="mt-2 text-base tracking-wide text-slate-100">{{ player.name }}</div>
-                  <div class="mt-1 text-sm text-emerald-100/80">{{ getVoteLabel(player.playerId) }}</div>
-                </article>
-
-                <article
-                  class="flex h-[120px] flex-col items-center justify-center px-2 text-center"
-                  *ngFor="let placeholder of placeholders"
-                  aria-hidden="true"
-                >
-                  <div class="h-14 w-14 opacity-0"></div>
-                </article>
-
-                <article
-                  class="flex h-[120px] flex-col items-center justify-center px-2 text-center"
-                  aria-label="Opción Saltear"
-                >
-                  <div class="flex items-center gap-2 text-base tracking-wide text-fuchsia-100">
-                    <span>SALTEAR</span>
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="h-4 w-4 text-fuchsia-200"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.6"
-                      aria-hidden="true"
-                    >
-                      <path d="M3 21l7-7" />
-                      <path d="M6 18l2 2" />
-                      <path d="M14 4l6 6-6 6-6-6z" />
-                    </svg>
-                    <span aria-hidden="true">→</span>
+                  <div class="mt-3 break-words text-lg tracking-wide text-slate-100 sm:text-xl">
+                    {{ player.name }}
                   </div>
+                  <div class="mt-1 text-base text-emerald-100/80 sm:text-lg">
+                    {{ getVoteLabel(player.playerId) }}
+                  </div>
+                </div>
 
+                <div class="flex flex-col items-center text-center" aria-label="Opción Saltear">
                   <div
-                    class="mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200/30 bg-slate-950/60"
+                    class="flex h-20 w-20 items-center justify-center rounded-full border border-emerald-200/30 bg-slate-950/60 md:h-24 md:w-24"
                     aria-hidden="true"
                   >
                     <svg
                       viewBox="0 0 24 24"
-                      class="h-6 w-6 text-emerald-100/80"
+                      class="h-7 w-7 text-emerald-100/80"
                       fill="none"
                       stroke="currentColor"
                       stroke-width="1.8"
@@ -94,31 +73,16 @@ import { HostPlayerSnapshot } from '../models';
                       <path d="M13 6l6 6-6 6" />
                     </svg>
                   </div>
-
-                  <div class="mt-2 text-sm text-emerald-100/80">{{ getVoteLabel(skipKey) }}</div>
-                </article>
-
-                <article
-                  class="flex h-[120px] flex-col items-center justify-center px-2 text-center"
-                  *ngFor="let player of remainingPlayers"
-                >
-                  <div
-                    class="flex aspect-square h-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30"
-                  >
-                    <img
-                      class="h-full w-full object-contain"
-                      [src]="'assets/img/avatar_' + player.avatarId + '.png'"
-                      [alt]="player.name"
-                      loading="lazy"
-                    />
+                  <div class="mt-3 text-lg tracking-wide text-fuchsia-100 sm:text-xl">SALTEAR</div>
+                  <div class="mt-1 text-base text-emerald-100/80 sm:text-lg">
+                    {{ getVoteLabel(skipKey) }}
                   </div>
-
-                  <div class="mt-2 text-base tracking-wide text-slate-100">{{ player.name }}</div>
-                  <div class="mt-1 text-sm text-emerald-100/80">{{ getVoteLabel(player.playerId) }}</div>
-                </article>
+                </div>
               </div>
             </div>
           </div>
+
+          <div class="h-8 sm:h-10"></div>
         </section>
       </main>
     </main>
@@ -131,25 +95,11 @@ export class VotationComponent implements OnInit, OnDestroy {
   @Output() readonly finished = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
-  private readonly firstRowCount = 4;
   remainingSeconds = 0;
   readonly skipKey = 'SKIP';
 
   get formattedTime(): string {
-    return String(this.remainingSeconds).padStart(3, '0');
-  }
-
-  get firstRowPlayers(): HostPlayerSnapshot[] {
-    return this.players.slice(0, this.firstRowCount);
-  }
-
-  get remainingPlayers(): HostPlayerSnapshot[] {
-    return this.players.slice(this.firstRowCount);
-  }
-
-  get placeholders(): number[] {
-    const count = Math.max(0, this.firstRowCount - this.firstRowPlayers.length);
-    return Array.from({ length: count }, (_, index) => index);
+    return `00:${String(this.remainingSeconds).padStart(2, '0')}`;
   }
 
   getVoteLabel(key: string): string {

@@ -36,7 +36,7 @@ interface GameShellVm {
 
 interface DebateData {
   question: string;
-  answers: { playerName: string; answerText: string }[];
+  answers: { playerName: string; answerText: string; avatarId?: number | null }[];
   totalSeconds: number;
 }
 
@@ -359,12 +359,20 @@ export class GameShellComponent {
     this.api.fetchHostSnapshot(roomCode).subscribe({
       next: (snapshot) => {
         const question = snapshot.playerQuestion?.pregunta ?? '';
-        const answers = (snapshot.currentRoundAnswers ?? [])
-          .filter((answer) => answer.answerText?.trim())
-          .map((answer) => ({
-            playerName: answer.playerName,
-            answerText: answer.answerText,
-          }));
+        const playersById = new Map(snapshot.players.map((player) => [player.playerId, player]));
+        const answersByPlayerId = new Map(
+          (snapshot.currentRoundAnswers ?? [])
+            .filter((answer) => answer.answerText?.trim())
+            .map((answer) => [answer.playerId, answer]),
+        );
+        const answers = snapshot.players.map((player) => {
+          const answer = answersByPlayerId.get(player.playerId);
+          return {
+            playerName: player.name,
+            answerText: answer?.answerText?.trim() ? answer.answerText : 'no respondio',
+            avatarId: player.avatarId ?? null,
+          };
+        });
         const totalSeconds = answers.length * 10;
         this.debateData = {
           question,
