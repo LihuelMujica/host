@@ -25,4 +25,8 @@ export class HostApiService {
   nextRound(roomCode: string): Observable<unknown> {
     return this.http.post(`${this.baseUrl}/game/${roomCode}/next-round`, {});
   }
+
+  startDebate(roomCode: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/game/${roomCode}/start-debate`, {});
+  }
 }

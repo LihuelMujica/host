@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ConnectionState, HostEvent, HostPlayerSnapshot, HostSnapshot } from './models';
 
 @Injectable({
@@ -8,6 +8,8 @@ import { ConnectionState, HostEvent, HostPlayerSnapshot, HostSnapshot } from './
 export class HostStoreService {
   private readonly snapshotSubject = new BehaviorSubject<HostSnapshot | null>(null);
   readonly snapshot$ = this.snapshotSubject.asObservable();
+  private readonly answerEventSubject = new Subject<AnswerEventPayload>();
+  readonly answerEvents$ = this.answerEventSubject.asObservable();
 
   setSnapshot(snapshot: HostSnapshot): void {
     this.snapshotSubject.next(this.normalizeSnapshot(snapshot));
@@ -15,6 +17,10 @@ export class HostStoreService {
 
   clearSnapshot(): void {
     this.snapshotSubject.next(null);
+  }
+
+  getSnapshot(): HostSnapshot | null {
+    return this.snapshotSubject.value;
   }
 
   applyEvent(event: HostEvent): void {
@@ -35,6 +41,11 @@ export class HostStoreService {
         const payload = event.payload as PlayerEventPayload;
         const players = this.upsertPlayer(current.players, payload);
         this.snapshotSubject.next({ ...current, players });
+        break;
+      }
+      case 'RESPUESTA_ENVIADA': {
+        const payload = event.payload as AnswerEventPayload;
+        this.answerEventSubject.next(payload);
         break;
       }
       default: {
@@ -86,4 +97,10 @@ interface PlayerEventPayload {
   connectionState?: ConnectionState | null;
   impostor?: boolean;
   isImpostor?: boolean;
+}
+
+interface AnswerEventPayload {
+  playerId: string;
+  playerName: string;
+  answerText: string;
 }
