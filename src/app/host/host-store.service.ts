@@ -34,7 +34,7 @@ export class HostStoreService {
     }
 
     if (event.type === 'EMPATE' || event.type === 'GANAN_JUGADORES' || event.type === 'GANA_IMPOSTOR') {
-      const roomCode = typeof event.metadata?.roomCode === 'string' ? event.metadata.roomCode : null;
+      const roomCode = typeof event.metadata?.['roomCode'] === 'string' ? event.metadata['roomCode'] : null;
       this.gameEventSubject.next({ type: event.type, payload: event.payload, roomCode });
       return;
     }
