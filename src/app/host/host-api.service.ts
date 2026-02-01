@@ -22,7 +22,7 @@ export class HostApiService {
     });
   }
 
-  nextRound(gameId: string): Observable<unknown> {
-    return this.http.post(`${this.baseUrl}/game/${gameId}/next-round`, {});
+  nextRound(roomCode: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/game/${roomCode}/next-round`, {});
   }
 }

@@ -118,7 +118,7 @@ export class GameShellComponent {
       return;
     }
 
-    this.api.nextRound(snapshot.gameId).subscribe({
+    this.api.nextRound(snapshot.roomCode).subscribe({
       next: () => {
         this.phaseOverrideSubject.next('QUESTIONS');
       },
