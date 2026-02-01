@@ -14,7 +14,7 @@ import { HostPlayerSnapshot } from '../models';
         <div class="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <p class="max-w-md text-xl leading-snug text-slate-100/80 sm:text-2xl">
             Entren por sus celulares a<br />
-            <span class="tracking-wide text-emerald-200">GAMETITLE.IO</span> e<br />
+            <span class="tracking-wide text-emerald-200">lihuelmujica.github.io/player</span> e<br />
             introduzcan el código
           </p>
 
