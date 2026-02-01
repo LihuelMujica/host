@@ -50,6 +50,9 @@ export class HostClientService {
       'PLAYER_DISCONNECTED',
       'RESPUESTA_ENVIADA',
       'VOTO_ENVIADO',
+      'EMPATE',
+      'GANAN_JUGADORES',
+      'GANA_IMPOSTOR',
     ].forEach((type) => {
       this.eventSource?.addEventListener(type, handleEvent as EventListener);
     });
