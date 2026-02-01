@@ -22,6 +22,13 @@ export interface HostRoundAnswer {
   answerText: string;
 }
 
+export interface HostRoundVote {
+  playerId: string;
+  playerName: string;
+  votedPlayerId: string;
+  votedPlayerName: string;
+}
+
 export interface HostPlayerSnapshot {
   playerId: string;
   name: string;
@@ -45,6 +52,7 @@ export interface HostSnapshot {
   playerQuestion?: HostQuestion | null;
   impostorQuestion?: HostQuestion | null;
   currentRoundAnswers?: HostRoundAnswer[];
+  currentRoundVotes?: HostRoundVote[];
 }
 
 export interface HostEvent<TPayload = unknown> {

@@ -43,11 +43,16 @@ export class HostClientService {
     };
 
     this.eventSource.onmessage = handleEvent;
-    ['HOST_SNAPSHOT', 'PLAYER_JOINED', 'PLAYER_CONNECTED', 'PLAYER_DISCONNECTED', 'RESPUESTA_ENVIADA'].forEach(
-      (type) => {
-        this.eventSource?.addEventListener(type, handleEvent as EventListener);
-      },
-    );
+    [
+      'HOST_SNAPSHOT',
+      'PLAYER_JOINED',
+      'PLAYER_CONNECTED',
+      'PLAYER_DISCONNECTED',
+      'RESPUESTA_ENVIADA',
+      'VOTO_ENVIADO',
+    ].forEach((type) => {
+      this.eventSource?.addEventListener(type, handleEvent as EventListener);
+    });
 
     this.eventSource.onerror = () => {
       this.eventSource?.close();

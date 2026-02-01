@@ -10,7 +10,7 @@ import { HomeComponent } from './ui/home.component';
 import { RoleAssignmentComponent } from './ui/role-assignment.component';
 import { QuestionsComponent } from './ui/questions.component';
 import { DebateComponent } from './ui/debate.component';
-import { VotationPlaceholderComponent } from './ui/votation-placeholder.component';
+import { VotationComponent } from './ui/votation.component';
 import { HostSnapshot } from './models';
 
 type GamePhase = 'HOME' | 'LOBBY' | 'ROLE_ASSIGNMENT' | 'QUESTIONS' | 'DEBATE' | 'VOTACION' | 'OTHER';
@@ -23,6 +23,12 @@ interface GameShellVm {
 interface DebateData {
   question: string;
   answers: { playerName: string; answerText: string }[];
+  totalSeconds: number;
+}
+
+interface VotationData {
+  players: HostSnapshot['players'];
+  voteCounts: Record<string, number>;
   totalSeconds: number;
 }
 
@@ -40,7 +46,7 @@ interface DebateData {
     RoleAssignmentComponent,
     QuestionsComponent,
     DebateComponent,
-    VotationPlaceholderComponent,
+    VotationComponent,
   ],
   template: `
     <ng-container *ngIf="vm$ | async as vm">
@@ -70,7 +76,13 @@ interface DebateData {
           [totalSeconds]="debateData?.totalSeconds ?? 0"
           (finished)="onDebateFinished()"
         />
-        <app-votation-placeholder *ngSwitchCase="'VOTACION'" />
+        <app-votation
+          *ngSwitchCase="'VOTACION'"
+          [players]="votationData?.players ?? []"
+          [voteCounts]="votationData?.voteCounts ?? {}"
+          [totalSeconds]="votationData?.totalSeconds ?? 20"
+          (finished)="onVotationFinished()"
+        />
         <div *ngSwitchDefault class="min-h-dvh flex items-center justify-center text-xl">
           En construcción...
         </div>
@@ -84,6 +96,7 @@ export class GameShellComponent {
   readonly answeredPlayerIds$ = this.answeredPlayerIdsSubject.asObservable();
   private debateRequestInFlight = false;
   debateData: DebateData | null = null;
+  votationData: VotationData | null = null;
   readonly vm$ = combineLatest([this.store.snapshot$, this.phaseOverrideSubject]).pipe(
     map(([snapshot, phaseOverride]) => ({
       snapshot,
@@ -111,6 +124,19 @@ export class GameShellComponent {
         this.startDebate(snapshot);
       }
     });
+
+    this.store.voteEvents$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((payload) => {
+      const current = this.votationData?.voteCounts ?? {};
+      const nextCounts = { ...current };
+      nextCounts[payload.votedPlayerId] = (nextCounts[payload.votedPlayerId] ?? 0) + 1;
+      this.votationData = this.votationData
+        ? { ...this.votationData, voteCounts: nextCounts }
+        : { players: [], voteCounts: nextCounts, totalSeconds: 20 };
+    });
+
+    this.store.snapshot$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((snapshot) => this.handleSnapshotPhase(snapshot));
   }
 
   onStartGame(): void {
@@ -158,6 +184,7 @@ export class GameShellComponent {
     this.answeredPlayerIdsSubject.next(new Set());
     this.debateRequestInFlight = false;
     this.debateData = null;
+    this.votationData = null;
   }
 
   onRoleAssignmentFinished(snapshot: HostSnapshot | null): void {
@@ -213,7 +240,7 @@ export class GameShellComponent {
     }
     this.api.startVoting(snapshot.roomCode).subscribe({
       next: () => {
-        this.phaseOverrideSubject.next('VOTACION');
+        this.loadVotationData(snapshot);
       },
       error: (error) => {
         const errorCode = error?.error?.error_code as string | undefined;
@@ -224,6 +251,28 @@ export class GameShellComponent {
           return;
         }
         window.alert('No se pudo iniciar la votación.');
+      },
+    });
+  }
+
+  onVotationFinished(): void {
+    const snapshot = this.storeSnapshot();
+    if (!snapshot) {
+      return;
+    }
+    this.api.processRound(snapshot.roomCode).subscribe({
+      next: () => {
+        this.phaseOverrideSubject.next('OTHER');
+      },
+      error: (error) => {
+        const errorCode = error?.error?.error_code as string | undefined;
+        if (errorCode === 'HOST_DISCONNECTED') {
+          this.client.disconnect();
+          this.client.connect(snapshot.roomCode);
+          window.alert('Host desconectado. Reiniciamos la conexión.');
+          return;
+        }
+        window.alert('No se pudo procesar la ronda.');
       },
     });
   }
@@ -256,6 +305,30 @@ export class GameShellComponent {
     });
   }
 
+  private handleSnapshotPhase(snapshot: HostSnapshot | null): void {
+    if (!snapshot) {
+      return;
+    }
+    if (snapshot.gameState === 'VOTANDO') {
+      this.loadVotationData(snapshot);
+      return;
+    }
+  }
+
+  private loadVotationData(snapshot: HostSnapshot): void {
+    const counts = (snapshot.currentRoundVotes ?? []).reduce<Record<string, number>>((acc, vote) => {
+      const key = vote.votedPlayerId;
+      acc[key] = (acc[key] ?? 0) + 1;
+      return acc;
+    }, {});
+    this.votationData = {
+      players: snapshot.players,
+      voteCounts: counts,
+      totalSeconds: 20,
+    };
+    this.phaseOverrideSubject.next('VOTACION');
+  }
+
   private storeSnapshot(): HostSnapshot | null {
     return this.store.getSnapshot();
   }
@@ -267,6 +340,10 @@ export class GameShellComponent {
 
     if (snapshot.gameState === 'LOBBY') {
       return 'LOBBY';
+    }
+
+    if (snapshot.gameState === 'VOTANDO') {
+      return 'VOTACION';
     }
 
     return 'OTHER';
