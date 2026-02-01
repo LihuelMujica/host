@@ -9,14 +9,21 @@ import { LobbyComponent } from './ui/lobby.component';
 import { HomeComponent } from './ui/home.component';
 import { RoleAssignmentComponent } from './ui/role-assignment.component';
 import { QuestionsComponent } from './ui/questions.component';
-import { DebatePlaceholderComponent } from './ui/debate-placeholder.component';
+import { DebateComponent } from './ui/debate.component';
+import { VotationPlaceholderComponent } from './ui/votation-placeholder.component';
 import { HostSnapshot } from './models';
 
-type GamePhase = 'HOME' | 'LOBBY' | 'ROLE_ASSIGNMENT' | 'QUESTIONS' | 'DEBATE' | 'OTHER';
+type GamePhase = 'HOME' | 'LOBBY' | 'ROLE_ASSIGNMENT' | 'QUESTIONS' | 'DEBATE' | 'VOTACION' | 'OTHER';
 
 interface GameShellVm {
   phase: GamePhase;
   snapshot: HostSnapshot | null;
+}
+
+interface DebateData {
+  question: string;
+  answers: { playerName: string; answerText: string }[];
+  totalSeconds: number;
 }
 
 @Component({
@@ -32,7 +39,8 @@ interface GameShellVm {
     HomeComponent,
     RoleAssignmentComponent,
     QuestionsComponent,
-    DebatePlaceholderComponent,
+    DebateComponent,
+    VotationPlaceholderComponent,
   ],
   template: `
     <ng-container *ngIf="vm$ | async as vm">
@@ -55,7 +63,14 @@ interface GameShellVm {
           [answeredPlayerIds]="answeredPlayerIds$ | async"
           (finished)="onQuestionsFinished(vm.snapshot)"
         />
-        <app-debate-placeholder *ngSwitchCase="'DEBATE'" />
+        <app-debate
+          *ngSwitchCase="'DEBATE'"
+          [question]="debateData?.question ?? ''"
+          [answers]="debateData?.answers ?? []"
+          [totalSeconds]="debateData?.totalSeconds ?? 0"
+          (finished)="onDebateFinished()"
+        />
+        <app-votation-placeholder *ngSwitchCase="'VOTACION'" />
         <div *ngSwitchDefault class="min-h-dvh flex items-center justify-center text-xl">
           En construcción...
         </div>
@@ -68,6 +83,7 @@ export class GameShellComponent {
   private readonly answeredPlayerIdsSubject = new BehaviorSubject<Set<string>>(new Set());
   readonly answeredPlayerIds$ = this.answeredPlayerIdsSubject.asObservable();
   private debateRequestInFlight = false;
+  debateData: DebateData | null = null;
   readonly vm$ = combineLatest([this.store.snapshot$, this.phaseOverrideSubject]).pipe(
     map(([snapshot, phaseOverride]) => ({
       snapshot,
@@ -141,6 +157,7 @@ export class GameShellComponent {
     this.phaseOverrideSubject.next(null);
     this.answeredPlayerIdsSubject.next(new Set());
     this.debateRequestInFlight = false;
+    this.debateData = null;
   }
 
   onRoleAssignmentFinished(snapshot: HostSnapshot | null): void {
@@ -174,6 +191,7 @@ export class GameShellComponent {
     this.api.startDebate(snapshot.roomCode).subscribe({
       next: () => {
         this.phaseOverrideSubject.next('DEBATE');
+        this.loadDebateData(snapshot.roomCode);
       },
       error: (error) => {
         this.debateRequestInFlight = false;
@@ -185,6 +203,37 @@ export class GameShellComponent {
           return;
         }
         window.alert('No se pudo iniciar el debate.');
+      },
+    });
+  }
+
+  onDebateFinished(): void {
+    this.phaseOverrideSubject.next('VOTACION');
+  }
+
+  private loadDebateData(roomCode: string): void {
+    this.api.fetchHostSnapshot(roomCode).subscribe({
+      next: (snapshot) => {
+        const question = snapshot.playerQuestion?.pregunta ?? '';
+        const answers = (snapshot.currentRoundAnswers ?? [])
+          .filter((answer) => answer.answerText?.trim())
+          .map((answer) => ({
+            playerName: answer.playerName,
+            answerText: answer.answerText,
+          }));
+        const totalSeconds = answers.length * 10;
+        this.debateData = {
+          question,
+          answers,
+          totalSeconds,
+        };
+      },
+      error: () => {
+        this.debateData = {
+          question: '',
+          answers: [],
+          totalSeconds: 0,
+        };
       },
     });
   }

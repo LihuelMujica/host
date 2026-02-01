@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { CreateRoomResponse } from './models';
+import { Observable, map } from 'rxjs';
+import { CreateRoomResponse, HostEvent, HostSnapshot } from './models';
 
 @Injectable({
   providedIn: 'root',
@@ -28,5 +28,11 @@ export class HostApiService {
 
   startDebate(roomCode: string): Observable<unknown> {
     return this.http.post(`${this.baseUrl}/game/${roomCode}/start-debate`, {});
+  }
+
+  fetchHostSnapshot(roomCode: string): Observable<HostSnapshot> {
+    return this.http
+      .get<HostEvent<HostSnapshot>>(`${this.baseUrl}/game/${roomCode}/host/snapshot`)
+      .pipe(map((response) => response.payload));
   }
 }
