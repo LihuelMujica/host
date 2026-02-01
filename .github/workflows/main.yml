@@ -38,7 +38,7 @@ jobs:
           TAG_NAME: deploy-${{ github.run_id }}
         run: |
           set -euo pipefail
-          BUILD_DIR="dist/player/browser"
+          BUILD_DIR="dist/host-client"
           if [ ! -d "$BUILD_DIR" ]; then
             echo "Build output not found at $BUILD_DIR"
             exit 1
@@ -59,7 +59,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/player/browser
+          path: dist/host-client
 
   deploy:
     runs-on: ubuntu-latest
