@@ -12,9 +12,9 @@ interface DebateAnswer {
   standalone: true,
   imports: [NgFor],
   template: `
-    <main class="min-h-dvh overflow-hidden bg-white text-black">
+    <main class="min-h-dvh overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
       <div class="fixed right-4 top-4 z-10 sm:right-8 sm:top-6">
-        <div class="font-mono text-xs tracking-widest text-black/80 sm:text-sm md:text-base">
+        <div class="font-mono text-xs tracking-widest text-emerald-100/80 sm:text-sm md:text-base">
           TIMER: {{ formattedTime }}
         </div>
       </div>
@@ -22,11 +22,11 @@ interface DebateAnswer {
       <main class="min-h-dvh px-4 py-4 sm:px-8 sm:py-6">
         <section class="flex min-h-dvh flex-col items-center justify-start">
           <header class="w-full max-w-6xl pt-10 sm:pt-12">
-            <div class="text-xs tracking-wide text-black/40 sm:text-sm">La pregunta era...</div>
-            <h1 class="mt-2 max-w-5xl text-base font-normal leading-snug sm:text-lg md:text-xl">
+            <div class="text-xs tracking-wide text-emerald-100/70 sm:text-sm">La pregunta era...</div>
+            <h1 class="mt-2 max-w-5xl text-base font-normal leading-snug text-fuchsia-100 sm:text-lg md:text-xl">
               {{ question }}
             </h1>
-            <div class="mt-3 max-w-4xl text-sm text-black/70 leading-snug sm:text-base md:text-lg">
+            <div class="mt-3 max-w-4xl text-sm text-slate-200/80 leading-snug sm:text-base md:text-lg">
               Estas son sus respuestas — debatan quién es el impostor.
             </div>
           </header>
@@ -41,12 +41,12 @@ interface DebateAnswer {
                   *ngFor="let answer of answers"
                 >
                   <div
-                    class="flex aspect-square h-14 items-center justify-center rounded-full bg-purple-200/80"
+                    class="flex aspect-square h-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30"
                     aria-hidden="true"
                   >
                     <svg
                       viewBox="0 0 24 24"
-                      class="block h-8 w-8 text-purple-900/70"
+                      class="block h-8 w-8 text-emerald-100/80"
                       fill="none"
                       stroke="currentColor"
                       stroke-width="1.8"
@@ -56,9 +56,9 @@ interface DebateAnswer {
                     </svg>
                   </div>
 
-                  <div class="mt-2 text-base tracking-wide">{{ answer.playerName }}</div>
+                  <div class="mt-2 text-base tracking-wide text-slate-100">{{ answer.playerName }}</div>
 
-                  <div class="mt-1 text-sm text-black/90 leading-snug break-words whitespace-normal">
+                  <div class="mt-1 text-sm text-slate-200/85 leading-snug break-words whitespace-normal">
                     {{ answer.answerText }}
                   </div>
                 </article>

@@ -8,12 +8,12 @@ import { HostPlayerSnapshot } from '../models';
   standalone: true,
   imports: [NgFor, NgStyle],
   template: `
-    <main class="min-h-dvh bg-white text-black">
+    <main class="min-h-dvh bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
       <div class="fixed right-6 top-6 z-10 sm:right-10 sm:top-8">
         <div class="flex items-center gap-2">
-          <span class="text-xs text-black/40 tracking-wide sm:text-sm">TIEMPO</span>
+          <span class="text-xs text-emerald-200/70 tracking-wide sm:text-sm">TIEMPO</span>
           <div
-            class="rounded-full border border-black/15 bg-black/[0.03] px-3 py-1 font-mono text-base tracking-widest sm:text-lg md:text-xl"
+            class="rounded-full border border-emerald-200/30 bg-slate-950/60 px-3 py-1 font-mono text-base tracking-widest text-emerald-100 sm:text-lg md:text-xl"
             aria-label="Timer"
           >
             {{ formattedTime }}
@@ -27,7 +27,7 @@ import { HostPlayerSnapshot } from '../models';
 
           <div class="mt-6 text-center sm:mt-8">
             <div class="mx-auto max-w-2xl">
-              <p class="text-lg text-black/90 leading-snug sm:text-xl md:text-2xl">
+              <p class="text-lg text-slate-100/85 leading-snug sm:text-xl md:text-2xl">
                 Ahora van a contestar una pregunta. El impostor contestará una pregunta similar a la de los
                 ciudadanos. No compartan la pantalla de sus celulares, y no le den mucha información al impostor.
               </p>
@@ -41,22 +41,19 @@ import { HostPlayerSnapshot } from '../models';
               >
                 <div class="flex flex-col items-center text-center" *ngFor="let player of players">
                   <div
-                    class="flex h-20 w-20 items-center justify-center rounded-full bg-purple-200/80 md:h-24 md:w-24"
-                    aria-hidden="true"
+                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30 md:h-24 md:w-24"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="h-12 w-12 text-purple-900/70 md:h-14 md:w-14"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    >
-                      <path d="M20 21a8 8 0 1 0-16 0" />
-                      <circle cx="12" cy="8" r="3.5" />
-                    </svg>
+                    <img
+                      class="h-full w-full object-contain"
+                      [src]="'assets/img/avatar_' + player.avatarId + '.png'"
+                      [alt]="player.name"
+                      loading="lazy"
+                    />
                   </div>
-                  <div class="mt-3 break-words text-lg tracking-wide sm:text-xl">{{ player.name }}</div>
-                  <div class="mt-1 text-base text-black/80 sm:text-lg">
+                  <div class="mt-3 break-words text-lg tracking-wide text-slate-100 sm:text-xl">
+                    {{ player.name }}
+                  </div>
+                  <div class="mt-1 text-base text-emerald-100/80 sm:text-lg">
                     {{ isReady(player.playerId) ? 'Listo' : 'Contestando...' }}
                   </div>
                 </div>
@@ -66,9 +63,9 @@ import { HostPlayerSnapshot } from '../models';
 
           <div class="mt-8">
             <div class="mx-auto w-full max-w-md">
-              <div class="h-1.5 w-full overflow-hidden rounded-full bg-black/10">
+              <div class="h-1.5 w-full overflow-hidden rounded-full bg-emerald-200/20">
                 <div
-                  class="h-full rounded-full bg-black/25 transition-[width]"
+                  class="h-full rounded-full bg-fuchsia-300/60 transition-[width]"
                   [ngStyle]="{ width: progressPercent + '%' }"
                 ></div>
               </div>

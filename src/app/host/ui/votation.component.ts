@@ -8,9 +8,9 @@ import { HostPlayerSnapshot } from '../models';
   standalone: true,
   imports: [NgFor],
   template: `
-    <main class="min-h-dvh overflow-hidden bg-white text-black">
+    <main class="min-h-dvh overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
       <div class="fixed right-4 top-4 z-10 sm:right-8 sm:top-6">
-        <div class="font-mono text-xs tracking-widest text-black/80 sm:text-sm md:text-base">
+        <div class="font-mono text-xs tracking-widest text-emerald-100/80 sm:text-sm md:text-base">
           TIMER: {{ formattedTime }}
         </div>
       </div>
@@ -18,12 +18,12 @@ import { HostPlayerSnapshot } from '../models';
       <main class="min-h-dvh px-4 py-4 sm:px-8 sm:py-6">
         <section class="flex min-h-dvh flex-col items-center justify-start">
           <header class="w-full max-w-6xl pt-10 sm:pt-12">
-            <h1 class="max-w-5xl text-base font-normal leading-snug sm:text-lg md:text-xl">
+            <h1 class="max-w-5xl text-base font-normal leading-snug text-slate-100/85 sm:text-lg md:text-xl">
               Hora de votar! Si empatan o sale mayoría “saltear”, se pasará a la siguiente pregunta (si es la última
               ronda ante un empate ganaría el impostor)
             </h1>
 
-            <div class="mt-4 h-px w-24 bg-black/10"></div>
+            <div class="mt-4 h-px w-24 bg-emerald-200/20"></div>
           </header>
 
           <div class="mt-4 flex w-full flex-1 items-start justify-center sm:mt-6">
@@ -36,23 +36,18 @@ import { HostPlayerSnapshot } from '../models';
                   *ngFor="let player of firstRowPlayers"
                 >
                   <div
-                    class="flex aspect-square h-14 items-center justify-center rounded-full bg-purple-200/80"
-                    aria-hidden="true"
+                    class="flex aspect-square h-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="block h-8 w-8 text-purple-900/70"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    >
-                      <path d="M20 21a8 8 0 1 0-16 0" />
-                      <circle cx="12" cy="8" r="3.5" />
-                    </svg>
+                    <img
+                      class="h-full w-full object-contain"
+                      [src]="'assets/img/avatar_' + player.avatarId + '.png'"
+                      [alt]="player.name"
+                      loading="lazy"
+                    />
                   </div>
 
-                  <div class="mt-2 text-base tracking-wide">{{ player.name }}</div>
-                  <div class="mt-1 text-sm text-black/80">{{ getVoteLabel(player.playerId) }}</div>
+                  <div class="mt-2 text-base tracking-wide text-slate-100">{{ player.name }}</div>
+                  <div class="mt-1 text-sm text-emerald-100/80">{{ getVoteLabel(player.playerId) }}</div>
                 </article>
 
                 <article
@@ -67,17 +62,30 @@ import { HostPlayerSnapshot } from '../models';
                   class="flex h-[120px] flex-col items-center justify-center px-2 text-center"
                   aria-label="Opción Saltear"
                 >
-                  <div class="text-base tracking-wide">
-                    SALTEAR <span aria-hidden="true">→</span>
+                  <div class="flex items-center gap-2 text-base tracking-wide text-fuchsia-100">
+                    <span>SALTEAR</span>
+                    <svg
+                      viewBox="0 0 24 24"
+                      class="h-4 w-4 text-fuchsia-200"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      aria-hidden="true"
+                    >
+                      <path d="M3 21l7-7" />
+                      <path d="M6 18l2 2" />
+                      <path d="M14 4l6 6-6 6-6-6z" />
+                    </svg>
+                    <span aria-hidden="true">→</span>
                   </div>
 
                   <div
-                    class="mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-black/[0.04]"
+                    class="mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200/30 bg-slate-950/60"
                     aria-hidden="true"
                   >
                     <svg
                       viewBox="0 0 24 24"
-                      class="h-6 w-6 text-black/55"
+                      class="h-6 w-6 text-emerald-100/80"
                       fill="none"
                       stroke="currentColor"
                       stroke-width="1.8"
@@ -87,7 +95,7 @@ import { HostPlayerSnapshot } from '../models';
                     </svg>
                   </div>
 
-                  <div class="mt-2 text-sm text-black/80">{{ getVoteLabel(skipKey) }}</div>
+                  <div class="mt-2 text-sm text-emerald-100/80">{{ getVoteLabel(skipKey) }}</div>
                 </article>
 
                 <article
@@ -95,23 +103,18 @@ import { HostPlayerSnapshot } from '../models';
                   *ngFor="let player of remainingPlayers"
                 >
                   <div
-                    class="flex aspect-square h-14 items-center justify-center rounded-full bg-purple-200/80"
-                    aria-hidden="true"
+                    class="flex aspect-square h-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400/30 via-slate-950/80 to-fuchsia-400/30"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      class="block h-8 w-8 text-purple-900/70"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                    >
-                      <path d="M20 21a8 8 0 1 0-16 0" />
-                      <circle cx="12" cy="8" r="3.5" />
-                    </svg>
+                    <img
+                      class="h-full w-full object-contain"
+                      [src]="'assets/img/avatar_' + player.avatarId + '.png'"
+                      [alt]="player.name"
+                      loading="lazy"
+                    />
                   </div>
 
-                  <div class="mt-2 text-base tracking-wide">{{ player.name }}</div>
-                  <div class="mt-1 text-sm text-black/80">{{ getVoteLabel(player.playerId) }}</div>
+                  <div class="mt-2 text-base tracking-wide text-slate-100">{{ player.name }}</div>
+                  <div class="mt-1 text-sm text-emerald-100/80">{{ getVoteLabel(player.playerId) }}</div>
                 </article>
               </div>
             </div>
