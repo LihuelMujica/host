@@ -36,6 +36,10 @@ export class HostStoreService {
     if (event.type === 'EMPATE' || event.type === 'GANAN_JUGADORES' || event.type === 'GANA_IMPOSTOR') {
       const roomCode = typeof event.metadata?.['roomCode'] === 'string' ? event.metadata['roomCode'] : null;
       console.info('[HostStore] Evento de cierre recibido.', event.type, event.payload);
+      const current = this.snapshotSubject.value;
+      if (current) {
+        this.snapshotSubject.next({ ...current, gameState: event.type });
+      }
       this.gameEventSubject.next({ type: event.type, payload: event.payload, roomCode });
       return;
     }
