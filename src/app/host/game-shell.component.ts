@@ -382,6 +382,11 @@ export class GameShellComponent {
     if (!snapshot) {
       return;
     }
+    const overridePhase = this.phaseOverrideSubject.value;
+    if (overridePhase === 'GANAN_JUGADORES' || overridePhase === 'GANA_IMPOSTOR') {
+      console.info('[HostUI] Ignorando snapshot, ya estamos en pantalla de victoria.', overridePhase);
+      return;
+    }
     if (snapshot.gameState === 'VOTANDO') {
       this.loadVotationData(snapshot);
       return;
