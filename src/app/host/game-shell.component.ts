@@ -1,5 +1,5 @@
 import { AsyncPipe, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
-import { Component, DestroyRef } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { HostApiService } from './host-api.service';
@@ -157,6 +157,7 @@ export class GameShellComponent {
     private readonly api: HostApiService,
     private readonly client: HostClientService,
     private readonly destroyRef: DestroyRef,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.store.answerEvents$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((payload) => {
       const nextIds = new Set(this.answeredPlayerIdsSubject.value);
@@ -442,6 +443,7 @@ export class GameShellComponent {
       impostorName: payload?.playerNameImpostor ?? this.getImpostorName(this.storeSnapshot()),
     };
     this.phaseOverrideSubject.next(event.type);
+    this.cdr.detectChanges();
   }
 
   private loadTieData(snapshot: HostSnapshot): void {
