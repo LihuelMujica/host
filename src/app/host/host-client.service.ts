@@ -33,7 +33,7 @@ export class HostClientService {
     const url = `https://caretas.up.railway.app/sse/host?roomName=${this.roomCode}`;
     this.eventSource = new EventSource(url);
 
-    this.eventSource.onmessage = (event) => {
+    const handleEvent = (event: MessageEvent<string>) => {
       this.reconnectAttempts = 0;
       const parsed = this.safeParse(event.data);
       if (!parsed) {
@@ -41,6 +41,11 @@ export class HostClientService {
       }
       this.store.applyEvent(parsed);
     };
+
+    this.eventSource.onmessage = handleEvent;
+    ['HOST_SNAPSHOT', 'PLAYER_JOINED', 'PLAYER_CONNECTED', 'PLAYER_DISCONNECTED'].forEach((type) => {
+      this.eventSource?.addEventListener(type, handleEvent as EventListener);
+    });
 
     this.eventSource.onerror = () => {
       this.eventSource?.close();
