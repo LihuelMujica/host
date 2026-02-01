@@ -33,6 +33,12 @@ export class HostStoreService {
       return;
     }
 
+    if (event.type === 'EMPATE' || event.type === 'GANAN_JUGADORES' || event.type === 'GANA_IMPOSTOR') {
+      const roomCode = typeof event.metadata?.roomCode === 'string' ? event.metadata.roomCode : null;
+      this.gameEventSubject.next({ type: event.type, payload: event.payload, roomCode });
+      return;
+    }
+
     const current = this.snapshotSubject.value;
     if (!current) {
       return;
@@ -55,12 +61,6 @@ export class HostStoreService {
       case 'VOTO_ENVIADO': {
         const payload = event.payload as VoteEventPayload;
         this.voteEventSubject.next(payload);
-        break;
-      }
-      case 'EMPATE':
-      case 'GANAN_JUGADORES':
-      case 'GANA_IMPOSTOR': {
-        this.gameEventSubject.next({ type: event.type, payload: event.payload });
         break;
       }
       default: {
@@ -130,4 +130,5 @@ interface VoteEventPayload {
 interface GameEventPayload {
   type: 'EMPATE' | 'GANAN_JUGADORES' | 'GANA_IMPOSTOR';
   payload: unknown;
+  roomCode: string | null;
 }

@@ -398,12 +398,32 @@ export class GameShellComponent {
     }
   }
 
-  private handleGameEvent(event: { type: 'EMPATE' | 'GANAN_JUGADORES' | 'GANA_IMPOSTOR'; payload: unknown }): void {
+  private handleGameEvent(event: {
+    type: 'EMPATE' | 'GANAN_JUGADORES' | 'GANA_IMPOSTOR';
+    payload: unknown;
+    roomCode: string | null;
+  }): void {
     this.isProcessingRound = false;
     if (event.type === 'EMPATE') {
       const snapshot = this.storeSnapshot();
       if (snapshot) {
         this.loadTieData(snapshot);
+        return;
+      }
+      if (event.roomCode) {
+        this.api.fetchHostSnapshot(event.roomCode).subscribe({
+          next: (freshSnapshot) => {
+            this.store.setSnapshot(freshSnapshot);
+            this.loadTieData(freshSnapshot);
+          },
+          error: () => {
+            this.tieData = { roundsRemaining: 0 };
+            this.phaseOverrideSubject.next('EMPATE');
+          },
+        });
+      } else {
+        this.tieData = { roundsRemaining: 0 };
+        this.phaseOverrideSubject.next('EMPATE');
       }
       return;
     }
