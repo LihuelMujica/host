@@ -391,10 +391,12 @@ export class GameShellComponent {
       return;
     }
     if (snapshot.gameState === 'GANAN_JUGADORES') {
+      this.outcomeData = { impostorName: this.getImpostorName(snapshot) };
       this.phaseOverrideSubject.next('GANAN_JUGADORES');
       return;
     }
     if (snapshot.gameState === 'GANA_IMPOSTOR') {
+      this.outcomeData = { impostorName: this.getImpostorName(snapshot) };
       this.phaseOverrideSubject.next('GANA_IMPOSTOR');
       return;
     }
@@ -431,7 +433,7 @@ export class GameShellComponent {
     }
     const payload = event.payload as { playerNameImpostor?: string } | null;
     this.outcomeData = {
-      impostorName: payload?.playerNameImpostor ?? '',
+      impostorName: payload?.playerNameImpostor ?? this.getImpostorName(this.storeSnapshot()),
     };
     this.phaseOverrideSubject.next(event.type);
   }
@@ -462,6 +464,13 @@ export class GameShellComponent {
       totalSeconds: 20,
     };
     this.phaseOverrideSubject.next('VOTACION');
+  }
+
+  private getImpostorName(snapshot: HostSnapshot | null): string {
+    if (!snapshot) {
+      return '';
+    }
+    return snapshot.players.find((player) => player.isImpostor)?.name ?? '';
   }
 
   private storeSnapshot(): HostSnapshot | null {
