@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { HostStoreService } from './host-store.service';
 import { HostEvent } from './models';
 
@@ -11,7 +11,10 @@ export class HostClientService {
   private readonly maxBackoffMs = 10000;
   private roomCode: string | null = null;
 
-  constructor(private readonly store: HostStoreService) {}
+  constructor(
+    private readonly store: HostStoreService,
+    private readonly zone: NgZone,
+  ) {}
 
   connect(roomCode: string): void {
     this.roomCode = roomCode;
@@ -39,7 +42,7 @@ export class HostClientService {
       if (!parsed) {
         return;
       }
-      this.store.applyEvent(parsed);
+      this.zone.run(() => this.store.applyEvent(parsed));
     };
 
     this.eventSource.onmessage = handleEvent;
@@ -74,7 +77,18 @@ export class HostClientService {
     try {
       return JSON.parse(raw) as HostEvent;
     } catch {
-      return null;
+      const start = raw.indexOf('{');
+      const end = raw.lastIndexOf('}');
+      if (start === -1 || end === -1 || end <= start) {
+        console.warn('[HostClient] No se pudo parsear el evento SSE.', raw);
+        return null;
+      }
+      try {
+        return JSON.parse(raw.slice(start, end + 1)) as HostEvent;
+      } catch {
+        console.warn('[HostClient] No se pudo parsear el JSON extraído del SSE.', raw);
+        return null;
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 import { AsyncPipe, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
-import { Component, DestroyRef } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { HostApiService } from './host-api.service';
@@ -145,6 +145,7 @@ export class GameShellComponent {
   tieData: TieData | null = null;
   outcomeData: OutcomeData | null = null;
   private isProcessingRound = false;
+  private processingIntervalId: number | null = null;
   readonly vm$ = combineLatest([this.store.snapshot$, this.phaseOverrideSubject]).pipe(
     map(([snapshot, phaseOverride]) => ({
       snapshot,
@@ -157,6 +158,7 @@ export class GameShellComponent {
     private readonly api: HostApiService,
     private readonly client: HostClientService,
     private readonly destroyRef: DestroyRef,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.store.answerEvents$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((payload) => {
       const nextIds = new Set(this.answeredPlayerIdsSubject.value);
@@ -240,6 +242,7 @@ export class GameShellComponent {
     this.tieData = null;
     this.outcomeData = null;
     this.isProcessingRound = false;
+    this.stopProcessingPolling();
   }
 
   onRoleAssignmentFinished(snapshot: HostSnapshot | null): void {
@@ -319,6 +322,7 @@ export class GameShellComponent {
       next: () => {
         this.isProcessingRound = true;
         this.phaseOverrideSubject.next('PROCESSING');
+        this.startProcessingPolling(snapshot.roomCode);
       },
       error: (error) => {
         const errorCode = error?.error?.error_code as string | undefined;
@@ -382,20 +386,29 @@ export class GameShellComponent {
     if (!snapshot) {
       return;
     }
+    const overridePhase = this.phaseOverrideSubject.value;
+    if (overridePhase === 'GANAN_JUGADORES' || overridePhase === 'GANA_IMPOSTOR') {
+      console.info('[HostUI] Ignorando snapshot, ya estamos en pantalla de victoria.', overridePhase);
+      return;
+    }
     if (snapshot.gameState === 'VOTANDO') {
+      this.stopProcessingPolling();
       this.loadVotationData(snapshot);
       return;
     }
     if (snapshot.gameState === 'EMPATE') {
+      this.stopProcessingPolling();
       this.loadTieData(snapshot);
       return;
     }
     if (snapshot.gameState === 'GANAN_JUGADORES') {
+      this.stopProcessingPolling();
       this.outcomeData = { impostorName: this.getImpostorName(snapshot) };
       this.phaseOverrideSubject.next('GANAN_JUGADORES');
       return;
     }
     if (snapshot.gameState === 'GANA_IMPOSTOR') {
+      this.stopProcessingPolling();
       this.outcomeData = { impostorName: this.getImpostorName(snapshot) };
       this.phaseOverrideSubject.next('GANA_IMPOSTOR');
       return;
@@ -408,6 +421,8 @@ export class GameShellComponent {
     roomCode: string | null;
   }): void {
     this.isProcessingRound = false;
+    this.stopProcessingPolling();
+    console.info('[HostUI] Procesando evento de cierre.', event.type, event.payload);
     if (event.type === 'EMPATE') {
       const snapshot = this.storeSnapshot();
       if (snapshot) {
@@ -436,6 +451,7 @@ export class GameShellComponent {
       impostorName: payload?.playerNameImpostor ?? this.getImpostorName(this.storeSnapshot()),
     };
     this.phaseOverrideSubject.next(event.type);
+    this.cdr.detectChanges();
   }
 
   private loadTieData(snapshot: HostSnapshot): void {
@@ -464,6 +480,30 @@ export class GameShellComponent {
       totalSeconds: 20,
     };
     this.phaseOverrideSubject.next('VOTACION');
+  }
+
+  private startProcessingPolling(roomCode: string): void {
+    if (this.processingIntervalId !== null) {
+      return;
+    }
+    this.processingIntervalId = window.setInterval(() => {
+      this.api.fetchHostSnapshot(roomCode).subscribe({
+        next: (snapshot) => {
+          this.store.setSnapshot(snapshot);
+        },
+        error: (error) => {
+          console.warn('[HostUI] No se pudo actualizar el estado durante el procesamiento.', error);
+        },
+      });
+    }, 500);
+  }
+
+  private stopProcessingPolling(): void {
+    if (this.processingIntervalId === null) {
+      return;
+    }
+    window.clearInterval(this.processingIntervalId);
+    this.processingIntervalId = null;
   }
 
   private getImpostorName(snapshot: HostSnapshot | null): string {
