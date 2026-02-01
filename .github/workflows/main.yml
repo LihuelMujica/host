@@ -1,0 +1,73 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build -- --configuration production --base-href "/${{ github.event.repository.name }}/"
+
+      - name: Create deploy tag
+        env:
+          TAG_NAME: deploy-${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          BUILD_DIR="dist/player/browser"
+          if [ ! -d "$BUILD_DIR" ]; then
+            echo "Build output not found at $BUILD_DIR"
+            exit 1
+          fi
+          DEPLOY_DIR="$(mktemp -d)"
+          cp -R "$BUILD_DIR"/. "$DEPLOY_DIR"/
+          pushd "$DEPLOY_DIR" >/dev/null
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy $TAG_NAME"
+          git tag "$TAG_NAME"
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          git push origin "$TAG_NAME"
+          popd >/dev/null
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/player/browser
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
