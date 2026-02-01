@@ -25,6 +25,7 @@ interface GameShellVm {
           *ngSwitchCase="'LOBBY'"
           [roomCode]="vm.snapshot?.roomCode ?? ''"
           [players]="vm.snapshot?.players ?? []"
+          (cancel)="onCancel()"
         />
         <div *ngSwitchDefault class="min-h-dvh flex items-center justify-center text-xl">
           En construcción...
@@ -57,6 +58,11 @@ export class GameShellComponent {
         window.alert('No se pudo crear la sala. Intenta nuevamente.');
       },
     });
+  }
+
+  onCancel(): void {
+    this.client.disconnect();
+    this.store.clearSnapshot();
   }
 
   private resolvePhase(snapshot: HostSnapshot | null): GameShellVm['phase'] {

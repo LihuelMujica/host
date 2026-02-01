@@ -13,6 +13,10 @@ export class HostStoreService {
     this.snapshotSubject.next(this.normalizeSnapshot(snapshot));
   }
 
+  clearSnapshot(): void {
+    this.snapshotSubject.next(null);
+  }
+
   applyEvent(event: HostEvent): void {
     if (event.type === 'HOST_SNAPSHOT') {
       this.setSnapshot(event.payload as HostSnapshot);

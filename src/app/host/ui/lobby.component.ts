@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { HostPlayerSnapshot } from '../models';
 
 @Component({
@@ -73,6 +73,7 @@ import { HostPlayerSnapshot } from '../models';
           <button
             type="button"
             class="text-lg font-semibold tracking-[0.2em] text-slate-700 underline underline-offset-8 transition hover:opacity-70 sm:text-xl"
+            (click)="cancel.emit()"
           >
             Cancelar
           </button>
@@ -91,4 +92,5 @@ import { HostPlayerSnapshot } from '../models';
 export class LobbyComponent {
   @Input({ required: true }) roomCode = '';
   @Input({ required: true }) players: HostPlayerSnapshot[] = [];
+  @Output() readonly cancel = new EventEmitter<void>();
 }
