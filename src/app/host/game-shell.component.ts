@@ -321,6 +321,7 @@ export class GameShellComponent {
     this.api.processRound(snapshot.roomCode).subscribe({
       next: () => {
         this.isProcessingRound = true;
+        this.votationData = null;
         this.phaseOverrideSubject.next('PROCESSING');
         this.startProcessingPolling(snapshot.roomCode);
       },
