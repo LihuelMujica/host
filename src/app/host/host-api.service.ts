@@ -30,6 +30,10 @@ export class HostApiService {
     return this.http.post(`${this.baseUrl}/game/${roomCode}/start-debate`, {});
   }
 
+  startVoting(roomCode: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/game/${roomCode}/start-voting`, {});
+  }
+
   fetchHostSnapshot(roomCode: string): Observable<HostSnapshot> {
     return this.http
       .get<HostEvent<HostSnapshot>>(`${this.baseUrl}/game/${roomCode}/host/snapshot`)

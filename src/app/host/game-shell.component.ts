@@ -190,7 +190,6 @@ export class GameShellComponent {
     this.debateRequestInFlight = true;
     this.api.startDebate(snapshot.roomCode).subscribe({
       next: () => {
-        this.phaseOverrideSubject.next('DEBATE');
         this.loadDebateData(snapshot.roomCode);
       },
       error: (error) => {
@@ -208,7 +207,25 @@ export class GameShellComponent {
   }
 
   onDebateFinished(): void {
-    this.phaseOverrideSubject.next('VOTACION');
+    const snapshot = this.storeSnapshot();
+    if (!snapshot) {
+      return;
+    }
+    this.api.startVoting(snapshot.roomCode).subscribe({
+      next: () => {
+        this.phaseOverrideSubject.next('VOTACION');
+      },
+      error: (error) => {
+        const errorCode = error?.error?.error_code as string | undefined;
+        if (errorCode === 'HOST_DISCONNECTED') {
+          this.client.disconnect();
+          this.client.connect(snapshot.roomCode);
+          window.alert('Host desconectado. Reiniciamos la conexión.');
+          return;
+        }
+        window.alert('No se pudo iniciar la votación.');
+      },
+    });
   }
 
   private loadDebateData(roomCode: string): void {
@@ -227,6 +244,7 @@ export class GameShellComponent {
           answers,
           totalSeconds,
         };
+        this.phaseOverrideSubject.next('DEBATE');
       },
       error: () => {
         this.debateData = {
