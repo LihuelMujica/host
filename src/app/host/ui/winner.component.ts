@@ -4,17 +4,17 @@ import { Component, Input } from '@angular/core';
   selector: 'app-winner',
   standalone: true,
   template: `
-    <main class="min-h-dvh bg-white text-black">
+    <main class="min-h-dvh bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-900 text-slate-100">
       <section class="mx-auto flex min-h-dvh w-full max-w-5xl flex-col items-center justify-center px-6 py-10 text-center">
-        <div class="text-xs uppercase tracking-[0.4em] text-black/40">{{ kicker }}</div>
-        <h1 class="mt-6 text-3xl font-semibold tracking-wide sm:text-4xl md:text-5xl">
+        <div class="text-xs uppercase tracking-[0.5em] text-emerald-200/70">{{ kicker }}</div>
+        <h1 class="mt-6 text-3xl font-semibold tracking-wide text-fuchsia-100 sm:text-4xl md:text-5xl">
           {{ title }}
         </h1>
-        <p class="mt-4 max-w-2xl text-base text-black/70 sm:text-lg md:text-xl">
+        <p class="mt-4 max-w-2xl text-base text-slate-200/80 sm:text-lg md:text-xl">
           {{ message }}
         </p>
-        <div class="mt-8 text-sm uppercase tracking-[0.3em] text-black/40">IMPOSTOR</div>
-        <div class="mt-2 text-2xl font-semibold tracking-wide text-black/80">
+        <div class="mt-8 text-sm uppercase tracking-[0.3em] text-emerald-100/70">IMPOSTOR</div>
+        <div class="mt-2 text-2xl font-semibold tracking-wide text-emerald-100">
           {{ impostorName || 'Desconocido' }}
         </div>
       </section>
