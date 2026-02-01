@@ -360,13 +360,19 @@ export class GameShellComponent {
       next: (snapshot) => {
         const question = snapshot.playerQuestion?.pregunta ?? '';
         const playersById = new Map(snapshot.players.map((player) => [player.playerId, player]));
-        const answers = (snapshot.currentRoundAnswers ?? [])
-          .filter((answer) => answer.answerText?.trim())
-          .map((answer) => ({
-            playerName: answer.playerName,
-            answerText: answer.answerText,
-            avatarId: playersById.get(answer.playerId)?.avatarId ?? null,
-          }));
+        const answersByPlayerId = new Map(
+          (snapshot.currentRoundAnswers ?? [])
+            .filter((answer) => answer.answerText?.trim())
+            .map((answer) => [answer.playerId, answer]),
+        );
+        const answers = snapshot.players.map((player) => {
+          const answer = answersByPlayerId.get(player.playerId);
+          return {
+            playerName: player.name,
+            answerText: answer?.answerText?.trim() ? answer.answerText : 'no respondio',
+            avatarId: player.avatarId ?? null,
+          };
+        });
         const totalSeconds = answers.length * 10;
         this.debateData = {
           question,
