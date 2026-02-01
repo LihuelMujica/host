@@ -1,4 +1,4 @@
-import { AsyncPipe, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import { AsyncPipe, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { Component } from '@angular/core';
 import { map } from 'rxjs';
 import { HostApiService } from './host-api.service';
@@ -16,7 +16,7 @@ interface GameShellVm {
 @Component({
   selector: 'app-game-shell',
   standalone: true,
-  imports: [AsyncPipe, NgSwitch, NgSwitchCase, NgSwitchDefault, LobbyComponent, HomeComponent],
+  imports: [AsyncPipe, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault, LobbyComponent, HomeComponent],
   template: `
     <ng-container *ngIf="vm$ | async as vm">
       <main [ngSwitch]="vm.phase">
