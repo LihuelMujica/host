@@ -15,7 +15,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
           <h1
             class="mt-6 text-4xl font-semibold uppercase tracking-[0.22em] text-fuchsia-200 drop-shadow-[0_4px_18px_rgba(236,72,153,0.45)] sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            GAME TITLE
+            CARETAS
           </h1>
           <p class="mt-6 text-lg text-slate-200/80">
             Prepara la sala, comparte el código y comienza una ronda con
