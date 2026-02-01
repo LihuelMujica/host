@@ -408,6 +408,7 @@ export class GameShellComponent {
     roomCode: string | null;
   }): void {
     this.isProcessingRound = false;
+    console.info('[HostUI] Procesando evento de cierre.', event.type, event.payload);
     if (event.type === 'EMPATE') {
       const snapshot = this.storeSnapshot();
       if (snapshot) {

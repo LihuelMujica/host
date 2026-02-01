@@ -77,11 +77,13 @@ export class HostClientService {
       const start = raw.indexOf('{');
       const end = raw.lastIndexOf('}');
       if (start === -1 || end === -1 || end <= start) {
+        console.warn('[HostClient] No se pudo parsear el evento SSE.', raw);
         return null;
       }
       try {
         return JSON.parse(raw.slice(start, end + 1)) as HostEvent;
       } catch {
+        console.warn('[HostClient] No se pudo parsear el JSON extraído del SSE.', raw);
         return null;
       }
     }
