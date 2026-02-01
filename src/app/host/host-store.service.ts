@@ -12,6 +12,8 @@ export class HostStoreService {
   readonly answerEvents$ = this.answerEventSubject.asObservable();
   private readonly voteEventSubject = new Subject<VoteEventPayload>();
   readonly voteEvents$ = this.voteEventSubject.asObservable();
+  private readonly gameEventSubject = new Subject<GameEventPayload>();
+  readonly gameEvents$ = this.gameEventSubject.asObservable();
 
   setSnapshot(snapshot: HostSnapshot): void {
     this.snapshotSubject.next(this.normalizeSnapshot(snapshot));
@@ -53,6 +55,12 @@ export class HostStoreService {
       case 'VOTO_ENVIADO': {
         const payload = event.payload as VoteEventPayload;
         this.voteEventSubject.next(payload);
+        break;
+      }
+      case 'EMPATE':
+      case 'GANAN_JUGADORES':
+      case 'GANA_IMPOSTOR': {
+        this.gameEventSubject.next({ type: event.type, payload: event.payload });
         break;
       }
       default: {
@@ -117,4 +125,9 @@ interface VoteEventPayload {
   playerName: string;
   votedPlayerId: string;
   votedPlayerName: string;
+}
+
+interface GameEventPayload {
+  type: 'EMPATE' | 'GANAN_JUGADORES' | 'GANA_IMPOSTOR';
+  payload: unknown;
 }

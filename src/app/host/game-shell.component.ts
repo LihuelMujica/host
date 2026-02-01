@@ -11,9 +11,23 @@ import { RoleAssignmentComponent } from './ui/role-assignment.component';
 import { QuestionsComponent } from './ui/questions.component';
 import { DebateComponent } from './ui/debate.component';
 import { VotationComponent } from './ui/votation.component';
+import { ProcessingRoundComponent } from './ui/processing-round.component';
+import { TieComponent } from './ui/tie.component';
+import { WinnerComponent } from './ui/winner.component';
 import { HostSnapshot } from './models';
 
-type GamePhase = 'HOME' | 'LOBBY' | 'ROLE_ASSIGNMENT' | 'QUESTIONS' | 'DEBATE' | 'VOTACION' | 'OTHER';
+type GamePhase =
+  | 'HOME'
+  | 'LOBBY'
+  | 'ROLE_ASSIGNMENT'
+  | 'QUESTIONS'
+  | 'DEBATE'
+  | 'VOTACION'
+  | 'PROCESSING'
+  | 'EMPATE'
+  | 'GANAN_JUGADORES'
+  | 'GANA_IMPOSTOR'
+  | 'OTHER';
 
 interface GameShellVm {
   phase: GamePhase;
@@ -32,6 +46,14 @@ interface VotationData {
   totalSeconds: number;
 }
 
+interface TieData {
+  roundsRemaining: number;
+}
+
+interface OutcomeData {
+  impostorName: string;
+}
+
 @Component({
   selector: 'app-game-shell',
   standalone: true,
@@ -47,6 +69,9 @@ interface VotationData {
     QuestionsComponent,
     DebateComponent,
     VotationComponent,
+    ProcessingRoundComponent,
+    TieComponent,
+    WinnerComponent,
   ],
   template: `
     <ng-container *ngIf="vm$ | async as vm">
@@ -83,6 +108,26 @@ interface VotationData {
           [totalSeconds]="votationData?.totalSeconds ?? 20"
           (finished)="onVotationFinished()"
         />
+        <app-processing-round *ngSwitchCase="'PROCESSING'" />
+        <app-tie
+          *ngSwitchCase="'EMPATE'"
+          [roundsRemaining]="tieData?.roundsRemaining ?? 0"
+          (finished)="onTieFinished()"
+        />
+        <app-winner
+          *ngSwitchCase="'GANAN_JUGADORES'"
+          kicker="Victoria"
+          title="Ganaron los jugadores"
+          message="Descubrieron al impostor a tiempo."
+          [impostorName]="outcomeData?.impostorName ?? ''"
+        />
+        <app-winner
+          *ngSwitchCase="'GANA_IMPOSTOR'"
+          kicker="Derrota"
+          title="Ganó el impostor"
+          message="El impostor logró pasar desapercibido."
+          [impostorName]="outcomeData?.impostorName ?? ''"
+        />
         <div *ngSwitchDefault class="min-h-dvh flex items-center justify-center text-xl">
           En construcción...
         </div>
@@ -97,6 +142,9 @@ export class GameShellComponent {
   private debateRequestInFlight = false;
   debateData: DebateData | null = null;
   votationData: VotationData | null = null;
+  tieData: TieData | null = null;
+  outcomeData: OutcomeData | null = null;
+  private isProcessingRound = false;
   readonly vm$ = combineLatest([this.store.snapshot$, this.phaseOverrideSubject]).pipe(
     map(([snapshot, phaseOverride]) => ({
       snapshot,
@@ -137,6 +185,10 @@ export class GameShellComponent {
     this.store.snapshot$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((snapshot) => this.handleSnapshotPhase(snapshot));
+
+    this.store.gameEvents$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
+      this.handleGameEvent(event);
+    });
   }
 
   onStartGame(): void {
@@ -185,6 +237,9 @@ export class GameShellComponent {
     this.debateRequestInFlight = false;
     this.debateData = null;
     this.votationData = null;
+    this.tieData = null;
+    this.outcomeData = null;
+    this.isProcessingRound = false;
   }
 
   onRoleAssignmentFinished(snapshot: HostSnapshot | null): void {
@@ -262,7 +317,8 @@ export class GameShellComponent {
     }
     this.api.processRound(snapshot.roomCode).subscribe({
       next: () => {
-        this.phaseOverrideSubject.next('OTHER');
+        this.isProcessingRound = true;
+        this.phaseOverrideSubject.next('PROCESSING');
       },
       error: (error) => {
         const errorCode = error?.error?.error_code as string | undefined;
@@ -273,6 +329,21 @@ export class GameShellComponent {
           return;
         }
         window.alert('No se pudo procesar la ronda.');
+      },
+    });
+  }
+
+  onTieFinished(): void {
+    const snapshot = this.storeSnapshot();
+    if (!snapshot) {
+      return;
+    }
+    this.api.nextRound(snapshot.roomCode).subscribe({
+      next: () => {
+        this.phaseOverrideSubject.next('QUESTIONS');
+      },
+      error: () => {
+        window.alert('No se pudo avanzar a la siguiente ronda.');
       },
     });
   }
@@ -313,6 +384,48 @@ export class GameShellComponent {
       this.loadVotationData(snapshot);
       return;
     }
+    if (snapshot.gameState === 'EMPATE') {
+      this.loadTieData(snapshot);
+      return;
+    }
+    if (snapshot.gameState === 'GANAN_JUGADORES') {
+      this.phaseOverrideSubject.next('GANAN_JUGADORES');
+      return;
+    }
+    if (snapshot.gameState === 'GANA_IMPOSTOR') {
+      this.phaseOverrideSubject.next('GANA_IMPOSTOR');
+      return;
+    }
+  }
+
+  private handleGameEvent(event: { type: 'EMPATE' | 'GANAN_JUGADORES' | 'GANA_IMPOSTOR'; payload: unknown }): void {
+    this.isProcessingRound = false;
+    if (event.type === 'EMPATE') {
+      const snapshot = this.storeSnapshot();
+      if (snapshot) {
+        this.loadTieData(snapshot);
+      }
+      return;
+    }
+    const payload = event.payload as { playerNameImpostor?: string } | null;
+    this.outcomeData = {
+      impostorName: payload?.playerNameImpostor ?? '',
+    };
+    this.phaseOverrideSubject.next(event.type);
+  }
+
+  private loadTieData(snapshot: HostSnapshot): void {
+    this.api.fetchHostSnapshot(snapshot.roomCode).subscribe({
+      next: (freshSnapshot) => {
+        const roundsRemaining = Math.max(0, 10 - (freshSnapshot.roundNumber ?? 0));
+        this.tieData = { roundsRemaining };
+        this.phaseOverrideSubject.next('EMPATE');
+      },
+      error: () => {
+        this.tieData = { roundsRemaining: 0 };
+        this.phaseOverrideSubject.next('EMPATE');
+      },
+    });
   }
 
   private loadVotationData(snapshot: HostSnapshot): void {
@@ -344,6 +457,18 @@ export class GameShellComponent {
 
     if (snapshot.gameState === 'VOTANDO') {
       return 'VOTACION';
+    }
+
+    if (snapshot.gameState === 'EMPATE') {
+      return 'EMPATE';
+    }
+
+    if (snapshot.gameState === 'GANAN_JUGADORES') {
+      return 'GANAN_JUGADORES';
+    }
+
+    if (snapshot.gameState === 'GANA_IMPOSTOR') {
+      return 'GANA_IMPOSTOR';
     }
 
     return 'OTHER';
