@@ -33,7 +33,7 @@ export class HostClientService {
     }
 
     this.eventSource?.close();
-    const url = `https://caretas.up.railway.app/sse/host?roomName=${this.roomCode}`;
+    const url = `https://caretas.apps.lihuel.ar/sse/host?roomName=${this.roomCode}`;
     this.eventSource = new EventSource(url);
 
     const handleEvent = (event: MessageEvent<string>) => {
