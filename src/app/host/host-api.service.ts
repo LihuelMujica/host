@@ -7,7 +7,7 @@ import { CreateRoomResponse, HostEvent, HostSnapshot } from './models';
   providedIn: 'root',
 })
 export class HostApiService {
-  private readonly baseUrl = 'https://caretas.up.railway.app';
+  private readonly baseUrl = 'https://caretas.apps.lihuel.ar';
 
   constructor(private readonly http: HttpClient) {}
 
